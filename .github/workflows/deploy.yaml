@@ -1,0 +1,76 @@
+name: Build & Deploy to Azure VM
+
+# ─── Trigger ────────────────────────────────────────────────────────────────
+# Runs automatically every time you push to the main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: SSH into VM → Build & Run Docker
+    runs-on: ubuntu-latest   # GitHub spins up a fresh Linux machine for this
+
+    steps:
+
+      # ── 1. Check out your code ─────────────────────────────────────────────
+      # Downloads your repo onto the GitHub Actions runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. SSH into your Azure VM and run commands ─────────────────────────
+      # Uses the appleboy/ssh-action to connect and run a shell script
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}          # Your VM's public IP address
+          username: ${{ secrets.VM_USER }}      # e.g. azureuser
+          key: ${{ secrets.VM_SSH_KEY }}        # Your private SSH key (PEM)
+          port: 22
+          script: |
+
+            # ── Install Docker if it isn't already installed ──────────────────
+            if ! command -v docker &> /dev/null; then
+              echo "Docker not found — installing..."
+              curl -fsSL https://get.docker.com | sh
+              sudo usermod -aG docker $USER
+              # Re-login not needed; we use sudo below for the first run
+              echo "Docker installed successfully"
+            else
+              echo "Docker already installed: $(docker --version)"
+            fi
+
+            # ── Pull the latest code from GitHub ─────────────────────────────
+            APP_DIR="$HOME/my-docker-app"
+
+            if [ -d "$APP_DIR" ]; then
+              echo "Updating existing repo..."
+              cd "$APP_DIR"
+              git pull origin main
+            else
+              echo "Cloning repo for the first time..."
+              git clone https://github.com/${{ secrets.APP_REPO }}.git "$APP_DIR"
+              cd "$APP_DIR"
+            fi
+
+            # ── Build a fresh Docker image ────────────────────────────────────
+            echo "Building Docker image..."
+            sudo docker build -t my-app .
+
+            # ── Stop & remove the old container if it's running ───────────────
+            echo "Stopping old container (if any)..."
+            sudo docker stop my-app-container 2>/dev/null || true
+            sudo docker rm   my-app-container 2>/dev/null || true
+
+            # ── Start the new container ───────────────────────────────────────
+            echo "Starting new container..."
+            sudo docker run -d \
+              --name my-app-container \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              my-app
+
+            # ── Confirm it's running ──────────────────────────────────────────
+            echo "✅ Deployment complete!"
+            sudo docker ps --filter name=my-app-container
