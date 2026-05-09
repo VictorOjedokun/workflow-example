@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Beginner Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f5f0;
+      --surface: #ffffff;
+      --border: #e5e0d8;
+      --accent: #1a1a2e;
+      --blue: #0066ff;
+      --green: #00994d;
+      --orange: #e65c00;
+      --text: #1a1a2e;
+      --muted: #6b6875;
+      --code-bg: #1a1a2e;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      line-height: 1.7;
+      padding: 48px 24px 80px;
+    }
+
+    .container { max-width: 760px; margin: 0 auto; }
+
+    header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 32px;
+      margin-bottom: 48px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    h1 em { font-style: normal; color: var(--blue); }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-top: 12px;
+      font-weight: 400;
+    }
+
+    .files-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .file-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .file-card .icon { font-size: 1.5rem; margin-bottom: 8px; }
+    .file-card .name {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .file-card .desc { font-size: 13px; color: var(--muted); }
+
+    .step {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 40px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .step-body { flex: 1; }
+
+    .step h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+
+    .cmd-block {
+      background: var(--code-bg);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+
+    .cmd-block code {
+      font-family: 'DM Mono', monospace;
+      font-size: 13.5px;
+      color: #a8e6a8;
+      display: block;
+      white-space: pre;
+    }
+
+    .cmd-block code .prompt { color: #555a7a; }
+    .cmd-block code .comment { color: #555a7a; }
+    .cmd-block code .flag { color: #ffcc80; }
+
+    .note {
+      background: #fff8e6;
+      border-left: 3px solid var(--orange);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #7a5c00;
+      margin-top: 10px;
+    }
+
+    .note strong { color: var(--orange); }
+
+    .success {
+      background: #e6fff2;
+      border-left: 3px solid var(--green);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #005c2e;
+      margin-top: 10px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .cheatsheet {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .cheatsheet table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cheatsheet th {
+      background: var(--accent);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .cheatsheet td {
+      padding: 11px 16px;
+      font-size: 13px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cheatsheet td:first-child {
+      font-family: 'DM Mono', monospace;
+      color: var(--blue);
+      font-size: 12px;
+    }
+
+    .cheatsheet td:last-child { color: var(--muted); }
+
+    footer {
+      margin-top: 64px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 24px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="tag">Beginner Guide</div>
+    <h1>Docker from <em>Zero</em></h1>
+    <p class="subtitle">Build, run, and ship a Node.js app inside a container — step by step.</p>
+  </header>
+
+  <!-- Files overview -->
+  <h3>📁 Your project files</h3>
+  <div class="files-grid">
+    <div class="file-card">
+      <div class="icon">📄</div>
+      <div class="name">app.js</div>
+      <div class="desc">The Node.js web server (your actual app)</div>
+    </div>
+    <div class="file-card">
+      <div class="icon">📦</div>
+      <div class="name">package.json</div>
+      <div class="desc">Lists your app's dependencies (express)</div>
+    </div>
+    <div class="file-card">
+      <div class="icon">🐳</div>
+      <div class="name">Dockerfile</div>
+      <div class="desc">Recipe Docker uses to build your image</div>
+    </div>
+    <div class="file-card">
+      <div class="icon">🚫</div>
+      <div class="name">.dockerignore</div>
+      <div class="desc">Files Docker should NOT copy into the image</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Steps -->
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h2>Install Docker Desktop</h2>
+      <p>Download and install Docker Desktop for your OS. It includes everything you need.</p>
+      <div class="cmd-block"><code>https://www.docker.com/products/docker-desktop/</code></div>
+      <p>After installing, verify it works:</p>
+      <div class="cmd-block"><code><span class="prompt">$ </span>docker --version
+<span class="comment"># Expected output: Docker version 26.x.x, build ...</span></code></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h2>Set up your project folder</h2>
+      <p>Create a folder and place all four files inside it.</p>
+      <div class="cmd-block"><code><span class="prompt">$ </span>mkdir my-docker-app
+<span class="prompt">$ </span>cd my-docker-app
+<span class="comment"># Now copy app.js, package.json, Dockerfile, .dockerignore here</span></code></div>
+      <p>Your folder should look like this:</p>
+      <div class="cmd-block"><code>my-docker-app/
+  ├── app.js
+  ├── package.json
+  ├── Dockerfile
+  └── .dockerignore</code></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h2>Build the Docker image</h2>
+      <p>This reads your Dockerfile and packages everything into an image. Run this from inside your project folder.</p>
+      <div class="cmd-block"><code><span class="prompt">$ </span>docker build <span class="flag">-t</span> my-app <span class="flag">.</span>
+<span class="comment"># -t my-app    → name/tag your image "my-app"
+# .            → use the current directory (where Dockerfile is)</span></code></div>
+      <div class="note"><strong>⏳ First time?</strong> Docker downloads the Node.js base image (~200 MB). This only happens once — future builds are much faster.</div>
+      <p style="margin-top:12px;">When it finishes you'll see:</p>
+      <div class="cmd-block"><code>=> => writing image sha256:abc123...
+=> => naming to docker.io/library/my-app</code></div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h2>Run the container</h2>
+      <p>Start a container from your image and expose port 3000 so you can reach it in your browser.</p>
+      <div class="cmd-block"><code><span class="prompt">$ </span>docker run <span class="flag">-p</span> 3000:3000 my-app
+<span class="comment"># -p 3000:3000  → map port 3000 on your machine to port 3000 inside the container</span></code></div>
+      <div class="success">✅ You should see: <strong>Server running on http://localhost:3000</strong></div>
+      <p style="margin-top:12px;">Open your browser and visit <strong>http://localhost:3000</strong> — your app is live!</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h2>Stop the container</h2>
+      <p>Press <strong>Ctrl + C</strong> in the terminal to stop it. To run it in the background instead:</p>
+      <div class="cmd-block"><code><span class="prompt">$ </span>docker run <span class="flag">-d</span> <span class="flag">-p</span> 3000:3000 <span class="flag">--name</span> myapp my-app
+<span class="comment"># -d            → detached mode (runs in background)
+# --name myapp  → give the running container a friendly name</span>
+
+<span class="prompt">$ </span>docker stop myapp   <span class="comment"># stop it later</span>
+<span class="prompt">$ </span>docker start myapp  <span class="comment"># start it again</span></code></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <h3>🔖 Essential Docker cheatsheet</h3>
+  <div class="cheatsheet">
+    <table>
+      <tr><th>Command</th><th>What it does</th></tr>
+      <tr><td>docker build -t name .</td><td>Build an image from the Dockerfile in current folder</td></tr>
+      <tr><td>docker run -p 3000:3000 name</td><td>Run a container, map port 3000</td></tr>
+      <tr><td>docker ps</td><td>List all running containers</td></tr>
+      <tr><td>docker ps -a</td><td>List all containers (including stopped ones)</td></tr>
+      <tr><td>docker images</td><td>List all local images</td></tr>
+      <tr><td>docker stop name</td><td>Gracefully stop a running container</td></tr>
+      <tr><td>docker rm name</td><td>Delete a stopped container</td></tr>
+      <tr><td>docker rmi name</td><td>Delete an image</td></tr>
+      <tr><td>docker logs name</td><td>View output/logs from a container</td></tr>
+      <tr><td>docker exec -it name sh</td><td>Open a shell inside a running container</td></tr>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <h3>💡 Key concepts in plain English</h3>
+  <div class="step" style="margin-top:16px;">
+    <div class="step-body">
+      <p><strong>Image</strong> — A snapshot/blueprint of your app and everything it needs. Like a ZIP file you share with others.</p>
+      <p><strong>Container</strong> — A running instance of an image. Like opening that ZIP file and actually running it.</p>
+      <p><strong>Dockerfile</strong> — A text recipe that tells Docker how to build your image, step by step.</p>
+      <p><strong>Port mapping (-p)</strong> — Your laptop and the container each have their own "doors" (ports). <code>-p 3000:3000</code> connects your door to the container's door.</p>
+    </div>
+  </div>
+
+  <footer>
+    Docker Beginner Guide · Build → Ship → Run anywhere
+  </footer>
+
+</div>
+</body>
+</html>
