@@ -169,8 +169,8 @@ app.get('/', (req, res) => {
       <div class="glow"></div>
       <div class="card">
         <div class="badge"><div class="dot"></div> Container Running</div>
-        <h1>Hello from <span>Docker</span></h1>
-        <p>Your Node.js app is live inside a container. This page is served by Express running on port 3000.</p>
+        <h1>Hello from <span>Rhemapath</span></h1>
+        <p>This class is being taught by Mr Victor. App runs on port 3000.</p>
         <div class="stats">
           <div class="stat">
             <div class="stat-val">Node</div>
