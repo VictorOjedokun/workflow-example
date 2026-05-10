@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    name: SSH into VM → Build & Run Docker
+    name: SSH into VM →and Build & Run Docker
     runs-on: ubuntu-latest
 
     steps:
@@ -70,5 +70,5 @@ jobs:
             sudo docker ps --filter name=my-app-container
 
         env:
-          # github.repository is automatically "username/repo-name" — no secret needed
+          
           REPO_URL: ${{ github.repository }}
